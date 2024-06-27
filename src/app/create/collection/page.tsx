@@ -21,6 +21,7 @@ import {
   FEERATE,
   RECEIVER_ADDRESS,
   MOCK_MENOMIC,
+  exampleJson,
 } from "@/lib/constants";
 import { mintToken } from "@/utils/mint";
 import CollectiblePreviewCard from "@/components/atom/cards/collectiblePreviewCard";
@@ -315,6 +316,29 @@ const CollectionDetail = () => {
     router.push("/create/collection");
   };
 
+  const downloadJsonFile = () => {
+    const jsonString = JSON.stringify(exampleJson, null, 2);
+
+    // Create a Blob with the JSON data
+    const blob = new Blob([jsonString], { type: "application/json" });
+
+    // Create a temporary URL for the Blob
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary anchor element
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "sample.json";
+
+    // Programmatically click the link to trigger the download
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Layout>
       <div className="flex flex-col w-full h-max bg-background pb-[148px]">
@@ -380,7 +404,7 @@ const CollectionDetail = () => {
                 <ButtonLg
                   title="Continue"
                   isSelected={true}
-                  onClick={() => triggerRefresh()}
+                  onClick={() => setStep(1)}
                 >
                   Continue
                 </ButtonLg>
@@ -433,9 +457,12 @@ const CollectionDetail = () => {
                 </p>
                 <div className="flex flex-row rounded-xl border-neutral400 border w-[443px] gap-3 justify-center items-center py-3">
                   <DocumentDownload size={24} color="#ffffff" />
-                  <p className="text-lg font-semibold text-neutral50">
-                    Download sample .CSV for correct formatting
-                  </p>
+                  <button
+                    className="text-lg font-semibold text-neutral50"
+                    onClick={() => downloadJsonFile()}
+                  >
+                    Download sample .JSON for correct formatting
+                  </button>
                 </div>
                 <div className={isChecked ? `flex` : `hidden`}>
                   {jsonData.length !== 0 && jsonMetaData ? (
@@ -480,7 +507,7 @@ const CollectionDetail = () => {
             </div>
           )}
           {/* launchpad step */}
-          {step == 2 && (
+          {step == 3 && (
             <div className="w-[592px] items-start flex flex-col gap-16">
               <div className="flex flex-col w-full gap-8">
                 <div className="flex flex-row items-center justify-between">
@@ -622,10 +649,10 @@ const CollectionDetail = () => {
               {error && <div className="text-red-500 -mt-5">{error}</div>}
             </div>
           )}
-          {step == 3 && (
+          {step == 2 && (
             <div className="w-[800px] flex flex-col gap-16">
               <div className="flex flex-row items-center justify-start w-full gap-8">
-                <Image
+                <img
                   src={imageBase64}
                   alt="background"
                   width={0}

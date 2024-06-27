@@ -1,34 +1,27 @@
 "use client";
-import React, { use, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Image from "next/image";
-import ButtonMd from "../ui/buttonMd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import HeaderItem from "../ui/headerItem";
-import { RECEIVER_ADDRESS, WALLET_URL } from "@/lib/constants";
-import dynamic from "next/dynamic";
+import { WALLET_URL } from "@/lib/constants";
 import { useConnector } from "anduro-wallet-connector-react";
-import { useMutation } from "@tanstack/react-query";
-import { loginHandler } from "@/lib/service/postRequest";
-import { clearToken, saveToken } from "@/lib/auth";
+import { clearToken } from "@/lib/auth";
 import { toast } from "sonner";
 
-// import {} from ''
-
+const routesData = [
+  {
+    title: "Create",
+    pageUrl: "/create",
+  },
+];
 export default function Header() {
   const router = useRouter();
   const { networkState, walletState, connect, disconnect } =
     useContext<any>(useConnector);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [walletAddress, setWalletAddress] = useState<string>("");
-
-  const routesData = [
-    {
-      title: "Create",
-      pageUrl: "/create",
-    },
-  ];
 
   const handleDisconnectionAction = async () => {
     const result = await disconnect();
@@ -39,40 +32,15 @@ export default function Header() {
     console.log("Connector Wallet Information", walletState);
   }, [walletState, networkState]);
 
-  const { data, status, mutateAsync } = useMutation({
-    mutationFn: loginHandler,
-    onError: (error) => {
-      console.log(error);
-    },
-    onSuccess: (data, variables) => {},
-  });
-
   useEffect(() => {
     const connectWalletOnLoad = async () => {
       try {
-        // if (window.unisat) {
-        //   const accounts = await window.unisat.getAccounts();
-
-        //   const detailsString = window.localStorage.getItem("userProfile");
-
-        //   if (detailsString !== null) {
-        //     const detailsJson =
-        //       detailsString !== "null" ? JSON.parse(detailsString) : null;
-        //     const now = moment();
-        //     if (now.isAfter(detailsJson.expiry) || accounts.length == 0) {
-        //       handleLogout();
-        //       return;
-        //     }
-
-        //     setUserProfile(detailsJson.address);
-
-        //     setConnectedAddress(accounts[0]);
-        //     setConnected(true);
-        //   }
-        // }
         if (window) {
-          const walletAddress = window.localStorage.getItem("userProfile");
+          const walletAddress = localStorage.getItem("connectedAddress");
           if (walletAddress) {
+            // if (walletState.connectionState == "disconnected") {
+            //   handleLogin();
+            // }
             setWalletAddress(walletAddress);
           }
         }
@@ -82,7 +50,7 @@ export default function Header() {
     };
 
     connectWalletOnLoad();
-  }, []);
+  }, [walletState]);
 
   const handleLogin = async () => {
     try {
@@ -91,35 +59,18 @@ export default function Header() {
         chainId: 4,
         walletURL: WALLET_URL,
       });
+      console.log("🚀 ~ handleLogin ~ response:", response);
       if (response.status == true) {
-        console.log("🚀 ~ handleLogin ~ response:", response);
         console.log(
           "🚀 ~ handleLogin ~ response.result.accountPublicKey:",
           response.result.accountPublicKey,
         );
-        // const walletAddress =
-        //   response?.result?.result?.accountPublicKey ?? TEST_ADDRESS;
+
         const walletAddress = response.result.accountPublicKey;
 
-        // const data = await mutateAsync({
-        //   walletData: walletAddress,
-        // });
-        // console.log(
-        //   "🚀 ~ file: ConnectWalletButton.tsx:99 ~ sign ~ data:",
-        //   data,
-        // );
-        // if (data.error) {
-        //   setIsConnecting(false);
-        //   return toast.error(data.error);
-        // } else {
-        // saveToken(data?.auth);
-        window.localStorage.setItem(
-          "userProfile",
-          JSON.stringify(walletAddress),
-        );
+        localStorage.setItem("connectedAddress", JSON.stringify(walletAddress));
         setWalletAddress(walletAddress);
 
-        // queryClient.invalidateQueries({ queryKey: ["userProfile"] });
         setIsConnecting(false);
         toast.success(`Successfully connected`);
         // }

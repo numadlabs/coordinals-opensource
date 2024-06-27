@@ -4,8 +4,6 @@ import React, { useState } from "react";
 import Banner from "@/components/section/banner";
 import Header from "@/components/layout/header";
 import Input from "@/components/ui/input";
-import TextArea from "@/components/ui/textArea";
-import UploadFile from "@/components/section/uploadFile";
 import ButtonLg from "@/components/ui/buttonLg";
 import { useRouter } from "next/navigation";
 import ButtonOutline from "@/components/ui/buttonOutline";
@@ -48,10 +46,10 @@ const SingleToken = () => {
   const [error, setError] = useState<string>("");
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    setError("");
     event.preventDefault();
     setIsLoading(true);
 
-    console.log("🚀 ~ handleSubmit ~ imageUrl:", imageUrl);
     if (!imageUrl) {
       setIsLoading(false);
       setError("Image not provided.");
@@ -75,32 +73,20 @@ const SingleToken = () => {
 
     if (data.ticker.length !== 7) {
       setIsLoading(false);
-      setError("Invalid ticker.");
+      setError("Invalid ticker. Need to be 7 character long");
       return;
     }
     try {
-      // const res = await sign({ message: "hi" });
       // console.log("🚀 ~ handleSubmit ~ res:", res);
       // Call the mintToken function with the required data
       const transactionResult = await mintToken(data, MOCK_MENOMIC, FEERATE);
-      // console.log("hex:", transactionHex);
-      // // const responseHex = await mintToken(data, MOCK_MENOMIC, FEERATE);
-      // const hex = transactionHex;
-      // const transactionResult = await signAndSendTransaction({
-      //   hex,
-      // });
-      // console.log("transaction result:", transactionResult);
-      // if (transactionResult.status == false) {
-      //   setError(transactionResult.message || "An error occurred"); // Set the error state
-      //   toast.error(transactionResult.message || "An error occurred");
-      // }
 
       if (transactionResult && transactionResult.error == false) {
         setError(transactionResult.message || "An error occurred"); // Set the error state
         toast.error(transactionResult.message || "An error occurred");
         setIsLoading(false);
       } else {
-        // setResponse(mintResponse);
+        setError("");
         setIsLoading(false);
         // setTxUrl(`https://testnet.coordiscan.io/tx/${mintResponse.result}`);
         setStep(1);
@@ -205,7 +191,7 @@ const SingleToken = () => {
           {step == 1 && (
             <div className="w-[800px] flex flex-col gap-16">
               <div className="w-full flex flex-row items-center gap-8 justify-start">
-                <Image
+                <img
                   src={imageUrl}
                   alt="background"
                   width={0}

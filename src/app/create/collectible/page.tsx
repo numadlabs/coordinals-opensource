@@ -106,11 +106,22 @@ const SingleCollectible = () => {
     }
     try {
       // Call the mintToken function with the required data
-      const mintResponse = await mintToken(data, MOCK_MENOMIC, FEERATE);
-      console.log("🚀 ~ handleSubmit ~ mintResponse:", mintResponse);
-      setResponse(mintResponse);
-      setIsLoading(false);
-      setTxUrl(`https://testnet.coordiscan.io/tx/${mintResponse.result}`);
+      const transactionResult = await mintToken(data, MOCK_MENOMIC, FEERATE);
+      console.log("🚀 ~ handleSubmit ~ mintResponse:", transactionResult);
+      if (transactionResult && transactionResult.error == false) {
+        setError(transactionResult.message || "An error occurred"); // Set the error state
+        toast.error(transactionResult.message || "An error occurred");
+        setIsLoading(false);
+      } else if (transactionResult) {
+        setError("");
+        setResponse(transactionResult);
+        setIsLoading(false);
+        setTxUrl(
+          `https://testnet.coordiscan.io/tx/${transactionResult.result}`,
+        );
+        setStep(1);
+      }
+
       setStep(1);
     } catch (error) {
       setError(error.message || "An error occurred"); // Set the error state
@@ -126,7 +137,7 @@ const SingleCollectible = () => {
   const triggerRefresh = () => {
     setStep(0);
     reset();
-    router.push("/create");
+    router.push("/create/collectible");
   };
 
   return (
@@ -204,7 +215,7 @@ const SingleCollectible = () => {
           {step == 1 && (
             <div className="w-[800px] flex flex-col gap-16">
               <div className="w-full flex flex-row items-center gap-8 justify-start">
-                <Image
+                <img
                   src={imageBase64}
                   alt="background"
                   width={0}

@@ -42,6 +42,7 @@ export type rpcResponse = {
   result: string;
   error: boolean;
   id: string;
+  message: string;
 };
 
 type Attribute = {
