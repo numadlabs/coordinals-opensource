@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Coordinals Open Source Project
+
+This project implements a Bitcoin Layer 2 solution for minting and managing tokens and NFTs using Coordinals protocol. It's built with Next.js and integrates with Anduro wallet.
+
+## Features
+
+- **Anduro Wallet Integration**: Seamlessly interact with the Anduro wallet for transaction management.
+- **Coordinals Indexer Implementation**: Utilize key functionalities of the Coordinals protocol: - getBlockCount - getBlockHash - getTransactionHex - getUtxos - sendTransactionToRpc [View example implementations here](https://github.com/numadlabs/coordinals-opensource/blob/main/src/utils/libs.ts)
+- **Token/NFT Minting**: Support for three types of assets: 1. Collectible: Single NFT minting 2. Collection: Multiple NFTs with the same ticker 3. Token: Fungible token creation
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js (version 20 or higher)
+- npm or yarn
+- [An Anduro wallet](https://chromewebstore.google.com/detail/anduro-wallet/khebhoaoppjeidmdkpdglmlhghnooijn?hl=en-US)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
+1. Clone the repository:
+   git clone [https://github.com/numadlabs/coordinals-opensource.git](https://github.com/your-repo/coordinals-opensource.git)
+
+2. Install dependencies:
+   cd coordinals-opensource
+   npm install
+
+### Configuration
+
+Create a `.env.local` file in the root directory and add the following:
+
+    NEXT_PUBLIC_MOCK_MENOMIC="your-anduro-wallet-seed-phrase"
+    NEXT_PUBLIC_RECEIVER_ADDRESS="your-public-address"
+
+Note: These are used to simulate the minting process. In future updates, we plan to implement direct transaction signing with Anduro wallet.
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Running the Development Server
 
-## Learn More
+```
+ npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the application
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Contributing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+We welcome contributions! Please see our [Contribution Guidelines](CONTRIBUTING.md) for details on how to get started.
