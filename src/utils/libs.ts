@@ -1,6 +1,12 @@
 import axios from "axios";
 import { utxo } from "@/types";
-import { maraUrl, rpcPort, rpcUrl } from "@/lib/constants";
+import {
+  maraUrl,
+  RPC_PASSWORD,
+  RPC_USERNAME,
+  rpcPort,
+  rpcUrl,
+} from "@/lib/constants";
 
 export async function getBlockCount() {
   const body = {
@@ -13,8 +19,8 @@ export async function getBlockCount() {
   try {
     const response = await axios.post(`${rpcUrl}:${rpcPort}`, body, {
       auth: {
-        username: process.env.RPC_USERNAME ?? "",
-        password: process.env.RPC_PASSWORD ?? "",
+        username: RPC_USERNAME ?? "",
+        password: RPC_PASSWORD ?? "",
       },
     });
 
@@ -36,8 +42,8 @@ export async function getBlockHash(height: number) {
 
   const response = await axios.post(`${rpcUrl}:${rpcPort}`, body, {
     auth: {
-      username: process.env.RPC_USERNAME ?? "",
-      password: process.env.RPC_PASSWORD ?? "",
+      username: RPC_USERNAME ?? "",
+      password: RPC_PASSWORD ?? "",
     },
   });
 
@@ -61,8 +67,8 @@ export async function getTransactionHex(
 
   const response = await axios.post(`${rpcUrl}:${rpcPort}`, body, {
     auth: {
-      username: process.env.RPC_USERNAME ?? "",
-      password: process.env.RPC_PASSWORD ?? "",
+      username: RPC_USERNAME ?? "",
+      password: RPC_PASSWORD ?? "",
     },
   });
 
@@ -79,7 +85,7 @@ export async function getTransactionHex(
   // try {
   const response = await axios.post(`${rpcUrl}:${rpcPort}`, body, {
     auth: {
-      username: process.env.RPC_USERNAME,
+      username: RPC_PASSWORDE,
       password: process.env.RPC_PASSWORD ??"",
     },
   });
@@ -124,8 +130,8 @@ export async function sendTransactionToRpc(transactionHex: string) {
 
   const response = await axios.post(`${rpcUrl}:${rpcPort}`, body, {
     auth: {
-      username: process.env.RPC_USERNAME ?? "",
-      password: process.env.RPC_PASSWORD ?? "",
+      username: RPC_USERNAME ?? "",
+      password: RPC_PASSWORD ?? "",
     },
   });
 

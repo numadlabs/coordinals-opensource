@@ -62,7 +62,7 @@ export function fetchBlockHash(height: number) {
 
 export function sendTransactionHelper(transactionHex: string) {
   return axios
-    .post("/api/sendTransactionToRpc", { transactionHex })
+    .post("/api/sendTransaction", { transactionHex })
     .then((response) => {
       return response.data.data;
     });

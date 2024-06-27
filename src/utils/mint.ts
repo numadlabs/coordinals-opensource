@@ -1,7 +1,6 @@
 import * as coordinate from "chromajs-lib";
 
 import { rpcResponse, tokenData, utxo } from "@/types";
-import axios from "axios";
 
 const schnorr = require("bip-schnorr");
 const convert = schnorr.convert;
@@ -12,7 +11,6 @@ const bip32 = BIP32Factory(ecc);
 
 import { calculateSize } from "./calculateFee";
 import { prepareInputs } from "./prepareInputs";
-import { rpcPort, rpcUrl } from "@/lib/constants";
 import {
   fetchBlockHash,
   fetchTransactionHex,
@@ -40,7 +38,7 @@ export async function mintToken(
   mnemonics: string,
   feeRate: number,
 ) {
-  //PREPARING INPUT UTXO
+  // Fetch available UTXOs for the given address
   let utxos: utxo[] = await fetchUtxos(data.address);
   console.log("🚀 ~ utxos:", utxos);
   if (utxos.length == 0) {
@@ -48,6 +46,7 @@ export async function mintToken(
   }
   let utxo = utxos[0];
 
+  // Check if the UTXO has been used recently and wait for a new one if necessary
   if (checkUsedUtxo(utxo.txid)) {
     console.log("mint waiting started");
     const savedUtxoTxid = getSavedUtxo();
@@ -68,12 +67,11 @@ export async function mintToken(
 
   console.log("inputs:", utxo);
 
-  /*   const blockHash = await fetchBlockHash(utxo.height);
-  const txHex = await fetchTransactionHex(utxo.txid, true, blockHash.result); */
+  // Fetch the block hash and transaction hex for the UTXO
   let blockHash, txHex;
 
-  //mempool UTXO
   if (utxo.confirmations !== 0) {
+    // Confirmed UTXO
     blockHash = await fetchBlockHash(utxo.height);
     let hexResponse = await fetchTransactionHex(
       utxo.txid,
@@ -81,10 +79,8 @@ export async function mintToken(
       blockHash.result,
     );
     txHex = hexResponse.result.hex;
-  }
-
-  //Confirmed UTXO
-  if (utxo.confirmations === 0) {
+  } else {
+    // Mempool UTXO
     let hexResponse = await fetchTransactionHex(utxo.txid, false, null);
     txHex = hexResponse.result;
   }
@@ -92,15 +88,17 @@ export async function mintToken(
   // console.log("transaction confirmations: ", utxo.confirmations);
   // console.log("transaction hex: ", txHex);
 
-  //INITIALIZING V10 TRANSACTION2
+  //INITIALIZING V10 TRANSACTION
   const opreturnData = JSON.stringify(data.opReturnValues);
 
   const payloadHex = convertDataToSha256Hex(opreturnData);
 
+  // Initialize PSBT (Partially Signed Bitcoin Transaction)
   const psbt = new coordinate.Psbt({
     network: coordinate.networks.testnet,
   });
 
+  // Set transaction version and asset-specific data
   psbt.setVersion(10);
   psbt.assettype = data.assetType;
   psbt.headline = stringtoHex(data.headline);
@@ -110,14 +108,14 @@ export async function mintToken(
 
   if (data.assetType === 0) psbt.setPrecisionType(8);
 
-  //ADDING INPUT
+  // Add input UTXO to the transaction
   psbt.addInput({
     hash: utxo.txid,
     index: utxo.vout,
     nonWitnessUtxo: Buffer.from(txHex, "hex"),
   });
 
-  //Output addresses
+  // Generate output addresses from mnemonic
   const seed = bip39.mnemonicToSeedSync(mnemonics);
   const root = bip32.fromSeed(seed, coordinate.networks.testnet);
 
@@ -138,10 +136,11 @@ export async function mintToken(
   if (!controllerAddress || !toAddress)
     throw new Error("Controller or change address does not exists.");
 
-  //Adding outputs
+  // Add outputs to the transaction
   psbt.addOutput({ address: controllerAddress, value: 10 ** 8 });
   psbt.addOutput({ address: toAddress, value: data.supply });
 
+  // Calculate transaction size and required fee
   const vbytes = await calculateSize(psbt, childNode, utxos);
 
   const requiredAmount = vbytes * feeRate;
@@ -149,12 +148,14 @@ export async function mintToken(
   let inputs: utxo[] = [],
     changeAmount = utxo.value - requiredAmount;
 
+  // If the current UTXO is insufficient, prepare additional inputs
   if (utxo.value < requiredAmount) {
     let result = await prepareInputs(data.address, requiredAmount, feeRate);
     inputs = result.inputs;
     changeAmount = result.changeAmount;
   }
 
+  // Add additional inputs if necessary
   if (inputs.length !== 0) {
     for (let i = 0; i < inputs.length; i++) {
       let hash = await fetchBlockHash(inputs[i].height);
@@ -168,8 +169,7 @@ export async function mintToken(
     }
   }
 
-  // console.log("Change amount:", changeAmount);
-
+  // Add change output
   psbt.addOutput({
     address: toAddress,
     value: changeAmount,
@@ -177,11 +177,13 @@ export async function mintToken(
 
   // return psbt.toHex();
 
+  // Sign all inputs
   for (let i = 0; i < psbt.inputCount; i++) {
     const signer = childNode.derive(0).derive(utxos[i].derviation_index);
     psbt.signInput(i, signer);
   }
 
+  // Finalize the transaction
   psbt.finalizeAllInputs();
 
   console.log(psbt.extractTransaction(true).toHex());
@@ -197,10 +199,12 @@ export async function mintToken(
     (psbt.extractTransaction(true).virtualSize() * 4) / 1000,
   );
 
+  // Check if transaction size exceeds the limit
   if ((psbt.extractTransaction(true).virtualSize() * 4) / 1000 > 3600) {
     throw new Error("Maximum file size exceeded.");
   }
 
+  // Broadcast the transaction
   try {
     const response: rpcResponse = await sendTransactionHelper(
       psbt.extractTransaction(true).toHex(),
