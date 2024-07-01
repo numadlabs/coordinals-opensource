@@ -8,7 +8,6 @@ import UploadFile from "@/components/section/uploadFile";
 import Input from "@/components/ui/input";
 import ButtonOutline from "@/components/ui/buttonOutline";
 import Image from "next/image";
-import TextArea from "@/components/ui/textArea";
 import { useRouter } from "next/navigation";
 import { mintToken } from "@/utils/mint";
 import UploadCardFit from "@/components/atom/cards/uploadCardFit";

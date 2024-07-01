@@ -56,7 +56,6 @@ export async function mintToken(
   }
   let utxo = utxos[0];
 
-  // Check if the UTXO has been used recently and wait for a new one if necessary
   if (checkUsedUtxo(utxo.txid)) {
     console.log("mint waiting started");
     const savedUtxoTxid = getSavedUtxo();
@@ -77,7 +76,6 @@ export async function mintToken(
 
   console.log("inputs:", utxo);
 
-  // Fetch the block hash and transaction hex for the UTXO
   let blockHash, txHex;
 
   if (utxo.confirmations !== 0) {
@@ -94,16 +92,9 @@ export async function mintToken(
     let hexResponse = await fetchTransactionHex(utxo.txid, false, null);
     txHex = hexResponse.result;
   }
-
-  // console.log("transaction confirmations: ", utxo.confirmations);
-  // console.log("transaction hex: ", txHex);
-
-  //INITIALIZING V10 TRANSACTION
   const opreturnData = JSON.stringify(data.opReturnValues);
 
   const payloadHex = convertDataToSha256Hex(opreturnData);
-
-  // Initialize PSBT (Partially Signed Bitcoin Transaction)
   const psbt = new coordinate.Psbt({
     network: coordinate.networks.testnet,
   });
@@ -194,27 +185,4 @@ export async function mintToken(
 
   console.log("Inputs: ", psbt.txInputs);
   console.log("Input count: ", psbt.inputCount);
-
-  console.log(
-    "Size check amount: ",
-    (psbt.extractTransaction(true).virtualSize() * 4) / 1000,
-  );
-
-  // Check if transaction size exceeds the limit
-  if ((psbt.extractTransaction(true).virtualSize() * 4) / 1000 > 3600) {
-    throw new Error("Maximum file size exceeded.");
-  }
-
-  // Broadcast the transaction
-  try {
-    const response: rpcResponse = await sendTransactionHelper(
-      psbt.extractTransaction(true).toHex(),
-    );
-    console.log(response);
-    saveUsedUtxo(utxo.txid);
-
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
 }
