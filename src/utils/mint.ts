@@ -38,8 +38,18 @@ export async function mintToken(
   mnemonics: string,
   feeRate: number,
 ) {
+  // Generating addresses from mnemonic
+  const seed = bip39.mnemonicToSeedSync(mnemonics);
+  const root = bip32.fromSeed(seed, coordinate.networks.testnet);
+
+  const childNode = root.derivePath("m/84'/2222'/0'");
+
+  const node = childNode.derive(0).derive(0);
+  const destNode = childNode.derive(0).derive(2);
+  const xpub = childNode.derive(0).neutered().toBase58();
+
   // Fetch available UTXOs for the given address
-  let utxos: utxo[] = await fetchUtxos(data.address);
+  let utxos: utxo[] = await fetchUtxos(xpub);
   console.log("🚀 ~ utxos:", utxos);
   if (utxos.length == 0) {
     throw { message: "UTXO not found" };
@@ -54,7 +64,7 @@ export async function mintToken(
     while (utxo.txid === savedUtxoTxid) {
       console.log("iteration started");
       await new Promise((resolve) => setTimeout(resolve, 1500)); // Wait for 2 seconds
-      utxos = await fetchUtxos(data.address);
+      utxos = await fetchUtxos(xpub);
       if (utxos.length > 0) {
         utxo = utxos[0];
       } else {
@@ -115,15 +125,6 @@ export async function mintToken(
     nonWitnessUtxo: Buffer.from(txHex, "hex"),
   });
 
-  // Generate output addresses from mnemonic
-  const seed = bip39.mnemonicToSeedSync(mnemonics);
-  const root = bip32.fromSeed(seed, coordinate.networks.testnet);
-
-  const childNode = root.derivePath("m/84'/2222'/0'");
-
-  const node = childNode.derive(0).derive(0);
-  const destNode = childNode.derive(0).derive(2);
-
   const controllerAddress = coordinate.payments.p2wpkh({
     pubkey: node.publicKey,
     network: coordinate.networks.testnet,
@@ -150,7 +151,7 @@ export async function mintToken(
 
   // If the current UTXO is insufficient, prepare additional inputs
   if (utxo.value < requiredAmount) {
-    let result = await prepareInputs(data.address, requiredAmount, feeRate);
+    let result = await prepareInputs(xpub, requiredAmount, feeRate);
     inputs = result.inputs;
     changeAmount = result.changeAmount;
   }
