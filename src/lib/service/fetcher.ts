@@ -1,7 +1,6 @@
 "use client";
 
 import axios from "axios";
-import axiosClient from "../axios";
 
 enum COLLECTION_STATUS {
   PENDING = "PENDING",
@@ -26,15 +25,6 @@ export interface CollectionType {
   userId: string;
   mintedCount: number;
 }
-
-export type CollectibleType = {
-  id: string;
-  name: string;
-  createdAt: Date;
-  fileKey: string;
-  status: "ACTIVE" | "INACTIVE";
-  collectionId: string;
-};
 
 export function fetchUtxos(address: string) {
   return axios.post("/api/utxo", { address }).then((response) => {
@@ -65,39 +55,5 @@ export function sendTransactionHelper(transactionHex: string) {
     .post("/api/sendTransaction", { transactionHex })
     .then((response) => {
       return response.data.data;
-    });
-}
-
-export async function fetchLaunchs(): Promise<CollectionType[]> {
-  return axiosClient.get(`/api/v1/collections`).then((response) => {
-    if (response.data.success) {
-      return response?.data.data;
-    } else {
-      throw new Error(response.data.error);
-    }
-  });
-}
-
-export async function fetchLaunchById(id: string): Promise<CollectionType> {
-  return axiosClient.get(`/api/v1/collections/${id}`).then((response) => {
-    if (response.data.success) {
-      return response?.data.data;
-    } else {
-      throw new Error(response.data.error);
-    }
-  });
-}
-
-export async function fetcCollectionByCollectionId(
-  id: string,
-): Promise<CollectibleType[]> {
-  return axiosClient
-    .get(`/api/v1/collectibles/${id}/collections`)
-    .then((response) => {
-      if (response.data.success) {
-        return response?.data.data;
-      } else {
-        throw new Error(response.data.error);
-      }
     });
 }

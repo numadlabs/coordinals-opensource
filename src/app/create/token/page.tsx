@@ -56,6 +56,12 @@ const SingleToken = () => {
       return;
     }
 
+    if (!headline) {
+      setError("headline not provided.");
+      setIsLoading(false);
+      return;
+    }
+
     const opReturnValues = [
       {
         image_url: imageUrl,
@@ -71,9 +77,27 @@ const SingleToken = () => {
       supply,
     };
 
-    if (data.ticker.length !== 7) {
+    if (supply == 0) {
+      setError("Supply can not be 0.");
       setIsLoading(false);
-      setError("Invalid ticker. Need to be 7 character long");
+      return;
+    }
+
+    if (!supply) {
+      setError("Supply can not be empty");
+      setIsLoading(false);
+      return;
+    }
+
+    if (supply == 2100000000000000) {
+      setError("Max amount of supply is 2100000000000000");
+      setIsLoading(false);
+      return;
+    }
+
+    if (data.ticker.length > 7) {
+      setIsLoading(false);
+      setError("Invalid ticker. Need to be no longer than 7 character long");
       return;
     }
     try {
@@ -102,7 +126,7 @@ const SingleToken = () => {
   const triggerRefresh = () => {
     setStep(0);
     reset();
-    router.push("/create/token");
+    router.push("/create");
   };
 
   const stepperData = ["Upload", "Confirm"];

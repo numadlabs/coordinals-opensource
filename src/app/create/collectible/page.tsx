@@ -36,19 +36,12 @@ const SingleCollectible = () => {
     setImageBase64,
     imageMime,
     setImageMime,
-    supply,
-    setSupply,
-    imageUrl,
-    setImageUrl,
+
     setTxUrl,
     txUrl,
     reset,
   } = useFormState();
 
-  // const [imageBase64, setImageBase64] = useState<string>("");
-  // const [imageMime, setImageMime] = useState<string>("");
-  // const [headline, setHeadline] = useState<string>("");
-  // const [ticker, setTicker] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [step, setStep] = useState<number>(0);
   const [response, setResponse] = useState<any>(null);
@@ -83,6 +76,12 @@ const SingleCollectible = () => {
       return;
     }
 
+    if (!headline) {
+      setError("headline not provided.");
+      setIsLoading(false);
+      return;
+    }
+
     const opReturnValues = [
       {
         image_data: imageBase64,
@@ -99,8 +98,8 @@ const SingleCollectible = () => {
       supply: 1,
     };
 
-    if (data.ticker.length !== 7) {
-      setError("Invalid ticker.");
+    if (data.ticker.length > 7) {
+      setError("Invalid ticker. Need to be no longer than 7 character long");
       setIsLoading(false);
       return;
     }
@@ -137,7 +136,7 @@ const SingleCollectible = () => {
   const triggerRefresh = () => {
     setStep(0);
     reset();
-    router.push("/create/collectible");
+    router.push("/create");
   };
 
   return (

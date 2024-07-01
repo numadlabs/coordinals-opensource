@@ -49,7 +49,6 @@ module.exports = {
       },
       backgroundImage: {
         backgroundImg: "url('/background.png')",
-        slideImg: "url('/slide.png')",
         "secondary-less": "var(--Black-less-opacity, rgba(33, 37, 41, 0.70))",
       },
       fontFamily: {
