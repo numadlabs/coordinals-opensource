@@ -11,10 +11,9 @@ import ButtonOutline from "@/components/ui/buttonOutline";
 import Layout from "@/components/layout/layout";
 import UploadCardFill from "@/components/atom/cards/uploadCardFill";
 import useFormState from "@/lib/store/useFormStore";
-import { Calendar2, Clock, DocumentDownload } from "iconsax-react";
+import { DocumentDownload } from "iconsax-react";
 import Toggle from "@/components/ui/toggle";
 import FileCard from "@/components/atom/cards/fileCard";
-import Image from "next/image";
 import { tokenData } from "@/types";
 import {
   ASSETTYPE,
@@ -26,16 +25,6 @@ import {
 import { mintToken } from "@/utils/mint";
 import CollectiblePreviewCard from "@/components/atom/cards/collectiblePreviewCard";
 import { toast } from "sonner";
-import { format } from "date-fns";
-
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 const stepperData = ["Details", "Upload", "Confirm"];
 
@@ -276,6 +265,12 @@ const CollectionDetail = () => {
     setIsLoading(true);
     setError("");
 
+    if (!headline) {
+      setError("headline not provided.");
+      setIsLoading(false);
+      return;
+    }
+
     const jsonValidationError = validateJsonInput(isChecked);
     if (jsonValidationError) {
       setError(jsonValidationError);
@@ -313,7 +308,7 @@ const CollectionDetail = () => {
   const triggerRefresh = () => {
     setStep(0);
     reset();
-    router.push("/create/collection");
+    router.push("/create");
   };
 
   const downloadJsonFile = () => {
@@ -489,10 +484,7 @@ const CollectionDetail = () => {
               )}
               {/* <div className="text-red-500">{error}</div> */}
               <div className="flex flex-row w-full gap-8">
-                <ButtonOutline
-                  title="Back"
-                  onClick={() => router.push("/create")}
-                />
+                <ButtonOutline title="Back" onClick={() => setStep(0)} />
                 <ButtonLg
                   // type="submit"
                   isSelected={true}
@@ -507,148 +499,7 @@ const CollectionDetail = () => {
             </div>
           )}
           {/* launchpad step */}
-          {step == 3 && (
-            <div className="w-[592px] items-start flex flex-col gap-16">
-              <div className="flex flex-col w-full gap-8">
-                <div className="flex flex-row items-center justify-between">
-                  <p className="font-bold text-profileTitle text-neutral50">
-                    Launch on Coordinals
-                  </p>
-                  <Toggle isChecked={isChecked} onChange={handleCheckBox} />
-                </div>
-                <p className="text-neutral100 text-lg2">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-                  ac ornare nisi. Aliquam eget semper risus, sed commodo elit.
-                  Curabitur sed congue magna. Donec ultrices dui nec ullamcorper
-                  aliquet. Nunc efficitur mauris id mi venenatis imperdiet.
-                  Integer mauris lectus, pretium eu nibh molestie, rutrum
-                  lobortis tortor. Duis sit amet sem fermentum, consequat est
-                  nec, ultricies justo.
-                </p>
-                <div className="flex flex-row items-center justify-between">
-                  <p className="font-bold text-profileTitle text-neutral50 pt-8 pb-8">
-                    Include whitelist phase
-                  </p>
-                  {/* <Toggle isChecked={isChecked} onChange={handleCheckBox} /> */}
-                </div>
-                <div className={isChecked ? `flex` : `hidden`}>
-                  <div className="grid gap-8">
-                    <div>
-                      <p className="font-bold text-profileTitle text-neutral50">
-                        Public phase
-                      </p>
-                      <p className="text-neutral100 text-lg2">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                        Proin ac ornare nisi. Aliquam eget semper risus, sed
-                        commodo elit. Curabitur sed congue magna. Donec ultrices
-                        dui nec ullamcorper aliquet. Nunc efficitur mauris id mi
-                        venenatis imperdiet. Integer mauris lectus, pretium eu
-                        nibh molestie, rutrum lobortis tortor. Duis sit amet sem
-                        fermentum, consequat est nec, ultricies justo.
-                      </p>
-                    </div>
-                    <div className="grid gap-4 w-full">
-                      <div className="flex justify-between items-center">
-                        <span>
-                          <p className="font-medium text-xl text-neutral50">
-                            Start date
-                          </p>
-                        </span>
-                        <span className="flex gap-4">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-[184px] h-[48px] justify-around",
-                                  !date && "text-muted-foreground",
-                                )}
-                              >
-                                <Calendar2 size="17" color="#f8f9fa" />
-                                {date ? (
-                                  format(date, "PPP")
-                                ) : (
-                                  <span className="font-normal text-neutral200 text-lg2">
-                                    YYYY-MM-DD
-                                  </span>
-                                )}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-auto p-0"
-                              align="start"
-                            >
-                              <Calendar
-                                mode="single"
-                                selected={date}
-                                onSelect={setDate}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-[184px] h-[48px] justify-start",
-                                  !date && "text-muted-foreground",
-                                )}
-                              >
-                                <Clock size="17" color="#f8f9fa" />
-                                {date ? (
-                                  format(date, "PPP")
-                                ) : (
-                                  <span className="font-normal text-neutral200 text-lg2 pl-3">
-                                    HH : MM
-                                  </span>
-                                )}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-auto p-0"
-                              align="start"
-                            >
-                              <Calendar
-                                mode="single"
-                                selected={date}
-                                onSelect={setDate}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {isLoading && (
-                <div>
-                  <progress value={progress.value} max={progress.total} />
-                  <p>{progress.message}</p>
-                  <p>{`${progress.value}/${progress.total} NFTs minted`}</p>
-                </div>
-              )}
-              {/* <div className="text-red-500">{error}</div> */}
-              <div className="flex flex-row w-full gap-8">
-                <ButtonOutline
-                  title="Back"
-                  onClick={() => router.push("/create")}
-                />
-                <ButtonLg
-                  // type="submit"
-                  isSelected={true}
-                  onClick={() => setStep(3)}
-                  isLoading={isLoading}
-                  // disabled={isLoading}
-                >
-                  {isLoading ? "...loading" : "Continue"}
-                </ButtonLg>
-              </div>
-              {error && <div className="text-red-500 -mt-5">{error}</div>}
-            </div>
-          )}
+
           {step == 2 && (
             <div className="w-[800px] flex flex-col gap-16">
               <div className="flex flex-row items-center justify-start w-full gap-8">

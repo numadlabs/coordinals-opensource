@@ -7,7 +7,6 @@ import { Button } from "../ui/button";
 import HeaderItem from "../ui/headerItem";
 import { WALLET_URL } from "@/lib/constants";
 import { useConnector } from "anduro-wallet-connector-react";
-import { clearToken } from "@/lib/auth";
 import { toast } from "sonner";
 
 const routesData = [
@@ -88,7 +87,6 @@ export default function Header() {
   const handleLogout = async () => {
     setWalletAddress("");
     await handleDisconnectionAction();
-    clearToken();
     window.localStorage.removeItem("userProfile");
     router.push("/");
   };

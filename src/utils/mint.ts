@@ -9,7 +9,7 @@ import * as bip39 from "bip39";
 import BIP32Factory from "bip32";
 const bip32 = BIP32Factory(ecc);
 
-import { calculateSize } from "./calculateFee";
+import { calculateSize } from "./calculateSize";
 import { prepareInputs } from "./prepareInputs";
 import {
   fetchBlockHash,
