@@ -56,6 +56,7 @@ export async function mintToken(
   }
   let utxo = utxos[0];
 
+  // Check if the UTXO has been used recently and wait for a new one if necessary
   if (checkUsedUtxo(utxo.txid)) {
     console.log("mint waiting started");
     const savedUtxoTxid = getSavedUtxo();
@@ -73,8 +74,6 @@ export async function mintToken(
 
     console.log("mint waiting ended");
   }
-
-  console.log("inputs:", utxo);
 
   let blockHash, txHex;
 
@@ -167,22 +166,28 @@ export async function mintToken(
     value: changeAmount,
   });
 
-  // return psbt.toHex();
-
   // Sign all inputs
   for (let i = 0; i < psbt.inputCount; i++) {
     const signer = childNode.derive(0).derive(utxos[i].derviation_index);
     psbt.signInput(i, signer);
   }
-
-  // Finalize the transaction
   psbt.finalizeAllInputs();
 
-  console.log(psbt.extractTransaction(true).toHex());
+  // Check if transaction size exceeds the limit
+  if ((psbt.extractTransaction(true).virtualSize() * 4) / 1000 > 3600) {
+    throw new Error("Maximum file size exceeded.");
+  }
 
-  console.log("Required fee(before preparing inputs): ", requiredAmount);
-  console.log("Actual fee: ", psbt.extractTransaction(true).virtualSize());
+  // Broadcast the transaction
+  try {
+    const response: rpcResponse = await sendTransactionHelper(
+      psbt.extractTransaction(true).toHex(),
+    );
+    console.log(response);
+    saveUsedUtxo(utxo.txid);
 
-  console.log("Inputs: ", psbt.txInputs);
-  console.log("Input count: ", psbt.inputCount);
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
 }
