@@ -30,7 +30,6 @@ This project implements a Bitcoin Layer 2 solution for minting and managing toke
 Create a `.env.local` file in the root directory and add the following:
 
     NEXT_PUBLIC_MOCK_MENOMIC="your-anduro-wallet-seed-phrase"
-    NEXT_PUBLIC_RECEIVER_ADDRESS="your-public-address"
 
 Note: These are used to simulate the minting process. In future updates, we plan to implement direct transaction signing with Anduro wallet.
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.

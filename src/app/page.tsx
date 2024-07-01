@@ -72,7 +72,7 @@ const Create = () => {
               sizes="100%"
               className="object-cover w-full h-full rounded-3xl"
             />
-            <div className="absolute top-0 flex flex-col items-center justify-center w-full h-full gap-6 bg-bannerBlack rounded-3xl backdrop-blur-3xl">
+            <div className="absolute top-0 flex flex-col items-center justify-center w-full h-full gap-6 bg-bannerBlack rounded-3xl backdrop-blur-3xl bg-opacity-[70%]">
               <p className="text-4xl font-bold text-neutral50">
                 What are you going to create?
               </p>
